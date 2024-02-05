@@ -83,9 +83,11 @@ def user(id):
 @apiUsers.route("/addUser", methods=["POST"])
 def addUser():
     try:
-        username = request.form.get("username")
         email = request.form.get("email")
         password = request.form.get("password")
+        
+        index = email.index('@')
+        username = email[:index]
 
         if username == None or email == None or password == None:
             return jsonify({"success": False, "message": "Missing fields"})
