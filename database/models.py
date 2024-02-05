@@ -27,6 +27,10 @@ class User(db.Model):
         return cls.query.filter_by(user_id=user_id).first()
     
     @classmethod
+    def get_user_by_email(cls, email):
+        return cls.query.filter_by(email=email).first()
+    
+    @classmethod
     def add_user(cls, username, email, password):  # Id'yi unique biz vericez.
         user = User(None, username, email, password, 0)
         db.session.add(user)

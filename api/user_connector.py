@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, Blueprint, request
-from werkzeug.security import generate_password_hash
+from werkzeug.security import generate_password_hash, check_password_hash
 from database.models import User
 
 apiUsers = Blueprint("apiUser", __name__, url_prefix="/api/users")
@@ -87,20 +87,37 @@ def addUser():
         email = request.form.get("email")
         password = request.form.get("password")
 
-        print("USERNAME: ", username)
-        print("EMAIL: ", email)
-        print("PASSWORD: ", password)
-
         if username == None or email == None or password == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
         hashed_password = generate_password_hash(password)
-
-        print("Hashed password: ", hashed_password)
 
         User.add_user(username, email, hashed_password)
 
         return jsonify({"success": True, "message": "User added successfully.."})
     except Exception as e:
         print("ERROR in addUser: ", e)
+        return jsonify({"success": False, "message": "There is an error"})
+    
+@apiUsers.route("/isUserExist", methods=["POST"])
+def isUserExist():
+    try:
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        if email == None or password == None:
+            return jsonify({"success": False, "message": "Missing fields"})
+        
+        user = User.get_user_by_email(email)
+        
+        hashed_password = user.password
+        
+        if check_password_hash(hashed_password, password):
+            return jsonify({"success": True, "message": "Successfully logged in"})
+        else:
+            return jsonify({"success": False, "message": "Wrong password or email."})
+        
+        
+    except Exception as e:
+        print("ERROR in isUserExist: ", e)
         return jsonify({"success": False, "message": "There is an error"})
