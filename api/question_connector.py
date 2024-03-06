@@ -17,7 +17,8 @@ def questions():
                 {
                     "question_id": question.question_id,
                     "question": question.question,
-                    "answer": question.answer
+                    "answer_one": question.answer_one,
+                    "answer_two": question.answer_two
                 }
             )
 
@@ -55,15 +56,13 @@ def random_question():
 def addQuestion():
     try:
         question = request.form.get("question")
-        answer = request.form.get("answer")
+        answer_one = request.form.get("answer_one")
+        answer_two = request.form.get("answer_two")
 
-        print("Question: ", question)
-        print("Answer: ", answer)
-
-        if question == None or answer == None:
+        if question == None or answer_one == None or answer_two == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
-        Question.add_question(question, answer)
+        Question.add_question(question, answer_one, answer_two)
 
         return jsonify({"success": True, "message": "Question added successfully.."})
     except Exception as e:
