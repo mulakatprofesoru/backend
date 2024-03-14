@@ -1,7 +1,5 @@
 from dataclasses import dataclass
 from database import db
-from sqlalchemy import event
-import csv
 
 @dataclass
 class User(db.Model):
@@ -74,12 +72,11 @@ class Question(db.Model):
     __tablename__ = "questions"
     
     question_id = db.Column(db.Integer, primary_key=True)
-    question = db.Column(db.String(300), nullable = False)
-    answer_one = db.Column(db.String(1000), nullable = False)
-    answer_two = db.Column(db.String(1000), nullable = False)
+    question = db.Column(db.String(3000), nullable = False)
+    answer_one = db.Column(db.String(2000), nullable = False)
+    answer_two = db.Column(db.String(2000), nullable = False)
     
-    def __init__(self, question_id, question, answer_one, answer_two):
-        self.question_id = question_id
+    def __init__(self, question, answer_one, answer_two):
         self.question = question
         self.answer_one = answer_one
         self.answer_two = answer_two
@@ -99,6 +96,6 @@ class Question(db.Model):
     
     @classmethod
     def add_question(cls, question, answer_one, answer_two):
-        new_question = Question(None, question, answer_one, answer_two)
+        new_question = Question(question, answer_one, answer_two)
         db.session.add(new_question)
         db.session.commit()
