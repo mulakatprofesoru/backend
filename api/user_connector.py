@@ -143,7 +143,7 @@ def addTrainingHistory(id):
         return jsonify({"success": True, "message": "History added successfully.."})
         
     except Exception as e:
-        print("ERROR in addHistory: ", e)
+        print("ERROR in addTrainingHistory: ", e)
         return jsonify({"success": False, "message": "There is an error"})
     
 @apiUsers.route("/<int:id>/getTrainingHistory", methods=["GET"])
@@ -170,5 +170,5 @@ def getTrainingHistory(id):
         return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})
         
     except Exception as e:
-        print("ERROR in getHistory: ", e)
+        print("ERROR in getTrainingHistory: ", e)
         return jsonify({"success": False, "message": "There is an error"})

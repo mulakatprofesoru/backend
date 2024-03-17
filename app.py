@@ -2,6 +2,7 @@ import csv
 from flask import Flask, jsonify
 from api.user_connector import apiUsers
 from api.question_connector import apiQuestion
+from api.test_connector import apiTest
 from flask_cors import CORS
 from flask import request
 
@@ -19,6 +20,7 @@ with app.app_context():
 
 app.register_blueprint(apiUsers)
 app.register_blueprint(apiQuestion)
+app.register_blueprint(apiTest)
 
 # Mert Buraya Bir bak
 # @app.route("/api/data")  

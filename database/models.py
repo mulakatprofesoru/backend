@@ -71,7 +71,7 @@ class User(db.Model):
         user.training_history.append(new_history)
         db.session.commit()
 
-@dataclass
+""" @dataclass
 class Test(db.Model):
     __tablename__ = "test"
     
@@ -82,7 +82,7 @@ class Test(db.Model):
     def __init__(self, test_id, user_id, score):
         self.test_id = test_id
         self.user_id = user_id
-        self.score = score
+        self.score = score """
 
 
 
@@ -139,3 +139,30 @@ class TrainingHistory(db.Model):
         self.user_id = user_id
         self.question_id = question_id
         self.answer = answer
+        
+        
+test_question_association = db.Table(
+    'test_question',
+    db.Column('test_id', db.Integer, db.ForeignKey('tests.test_id')),
+    db.Column('question_id', db.Integer, db.ForeignKey('questions.question_id'))
+)
+
+@dataclass
+class Test(db.Model):
+    __tablename__ = "tests"
+    
+    test_id = db.Column(db.Integer, primary_key=True)
+    questions = db.relationship("Question", secondary=test_question_association, backref="tests")
+
+    def __init__(self, questions):
+        self.questions = questions
+        
+    @classmethod
+    def get_test_by_id(cls, test_id):
+        return cls.query.filter_by(test_id=test_id).first()
+    
+    @classmethod
+    def add_test(cls, questions):
+        new_test = Test(questions)
+        db.session.add(new_test)
+        db.session.commit()
