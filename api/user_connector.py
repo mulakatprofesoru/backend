@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, Blueprint, request
+from flask import jsonify, Blueprint, request, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.models import User
 
@@ -122,6 +122,40 @@ def isUserExist():
         
     except Exception as e:
         print("ERROR in isUserExist: ", e)
+        return jsonify({"success": False, "message": "There is an error"})
+    
+@apiUsers.route("/login", methods=["POST"])
+def login():
+    try:
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        if email == None or password == None:
+            return jsonify({"success": False, "message": "Missing fields"})
+        
+        print("Email: " + email)
+        session["email"] = email
+        
+        print("login",session["email"])
+        return jsonify({"success": True, "message": "Successfully logged in"})
+        
+    except Exception as e:
+        print("ERROR in login: ", e)
+        
+        return jsonify({"success": False, "message": "There is an error"})
+    
+    
+@apiUsers.route("/logout", methods=["POST"])
+def logout():
+    try:      
+        if "email" in session:
+            email = session["email"]
+            print("Logout email: " + email)
+            session.pop("email", None)
+        return jsonify({"success": True, "message": "Successfully logged in"})       
+        
+    except Exception as e:
+        print("ERROR in logout: ", e)
         return jsonify({"success": False, "message": "There is an error"})
 
 @apiUsers.route("/<int:id>/addTrainingHistory", methods=["POST"])

@@ -12,6 +12,7 @@ from database.initialize_db import createDB
 from database import db
 
 app = createApp()  
+app.secret_key = "1234"
 createDB()
 CORS(app)
 
