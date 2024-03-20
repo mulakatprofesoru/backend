@@ -30,6 +30,10 @@ class User(db.Model):
     
     @classmethod
     def get_user_by_email(cls, email):
+        return cls.query.filter_by(email = email).first()
+    
+    @classmethod
+    def get_user_by_email(cls, email):
         return cls.query.filter_by(email=email).first()
     
     @classmethod
@@ -94,13 +98,15 @@ class Question(db.Model):
     question = db.Column(db.String(3000), nullable = False)
     answer_one = db.Column(db.String(2000), nullable = False)
     answer_two = db.Column(db.String(2000), nullable = False)
+    question_type = db.Column(db.String(200), nullable = False)
     
     training_history = db.relationship("TrainingHistory", back_populates="question", cascade="all, delete-orphan")
     
-    def __init__(self, question, answer_one, answer_two):
+    def __init__(self, question, answer_one, answer_two, question_type):
         self.question = question
         self.answer_one = answer_one
         self.answer_two = answer_two
+        self.question_type = question_type
         
     
     @classmethod
@@ -110,6 +116,10 @@ class Question(db.Model):
     @classmethod
     def get_num_of_questions(cls):  
         return len(cls.query.all())
+    
+    @classmethod
+    def get_questions_by_type(cls, question_type):
+        return cls.query.filter_by(question_type = question_type).all()
     
     @classmethod
     def get_question_by_id(cls, question_id):

@@ -28,29 +28,30 @@ def questions():
         print("ERROR in questions: ", e)
         return jsonify({"success": False, "message": "There is an error..."})
     
-
-@apiQuestion.route("/random", methods=["GET"])
-def random_question():
+@apiQuestion.route("/random/<question_type>", methods=["GET"])
+def random_question(question_type):
     try:
-        total_questions_number = Question.get_num_of_questions()
+        if question_type == "bilgisayar-muhendisligi":
+            question_type_num = "1"
+        else: #Genel Soru Tipi
+            question_type_num = "0"
 
-        random_id = random.randint(1, total_questions_number)
-        random_question_whole_entity = Question.get_question_by_id(question_id=random_id)
+        questions = Question.get_questions_by_type(question_type_num)
 
-        random_question = {
-                    "question_id": random_question_whole_entity.question_id,
-                    "question": random_question_whole_entity.question
-                }
-        
-        #data = {'question': 'Bizi neden tercih ettiniz?'}
-        #return jsonify(data)
+        if questions:
+            random_question = random.choice(questions)
+            random_question_data = {
+                    "question_id": random_question.question_id,
+                    "question": random_question.question
+            }
+            return jsonify({"succes": True, "data": random_question_data})
 
-        return jsonify({"succes": True, "data": random_question})
+        else:
+            return jsonify({'message': "Cannot find this type of question"})
 
     except Exception as e:
         print("ERROR in selection of random question: ", e)
         return jsonify({"success": False, "message": "There is an error..."})
-    
 
 @apiQuestion.route("/addQuestion", methods=["POST"])
 def addQuestion():

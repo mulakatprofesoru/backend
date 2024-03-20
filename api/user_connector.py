@@ -1,9 +1,9 @@
-from flask import jsonify, Blueprint, request, session
+from flask import jsonify, Blueprint, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.models import User
+from database.models import Question, User
 
 apiUsers = Blueprint("apiUser", __name__, url_prefix="/api/users")
-
+__globalEmail = None
 
 @apiUsers.route("/")
 def users():
@@ -133,10 +133,9 @@ def login():
         if email == None or password == None:
             return jsonify({"success": False, "message": "Missing fields"})
         
-        print("Email: " + email)
-        session["email"] = email
+        global __globalEmail
+        __globalEmail = email
         
-        print("login",session["email"])
         return jsonify({"success": True, "message": "Successfully logged in"})
         
     except Exception as e:
@@ -148,20 +147,25 @@ def login():
 @apiUsers.route("/logout", methods=["POST"])
 def logout():
     try:      
-        if "email" in session:
-            email = session["email"]
-            print("Logout email: " + email)
-            session.pop("email", None)
-        return jsonify({"success": True, "message": "Successfully logged in"})       
+        global __globalEmail
+        if __globalEmail == None:
+            return jsonify({"success": False, "message": "Not logged in"})
+        
+        __globalEmail = None   
+        return jsonify({"success": True, "message": "Successfully logged out"})       
         
     except Exception as e:
         print("ERROR in logout: ", e)
         return jsonify({"success": False, "message": "There is an error"})
 
-@apiUsers.route("/<int:id>/addTrainingHistory", methods=["POST"])
-def addTrainingHistory(id):
+@apiUsers.route("/addTrainingHistory", methods=["POST"])
+def addTrainingHistory():
     try:
-        user = User.get_user_by_id(id)
+        global __globalEmail
+        if __globalEmail == None:
+            return jsonify({"success": False, "message": "Not logged in"})
+        
+        user = User.get_user_by_email(__globalEmail)
 
         if user is None:
             return jsonify({"success": False, "message": "User not found"})
@@ -172,7 +176,7 @@ def addTrainingHistory(id):
         if question_id == None or answer == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
-        User.add_history_by_id(id, question_id, answer)
+        User.add_history_by_id(user.user_id, question_id, answer)
 
         return jsonify({"success": True, "message": "History added successfully.."})
         
@@ -180,10 +184,14 @@ def addTrainingHistory(id):
         print("ERROR in addTrainingHistory: ", e)
         return jsonify({"success": False, "message": "There is an error"})
     
-@apiUsers.route("/<int:id>/getTrainingHistory", methods=["GET"])
-def getTrainingHistory(id):
+@apiUsers.route("/getTrainingHistory", methods=["GET"])
+def getTrainingHistory():
     try:
-        user = User.get_user_by_id(id)
+        global __globalEmail
+        if __globalEmail == None:
+            return jsonify({"success": False, "message": "Not logged in"})
+        
+        user = User.get_user_by_email(__globalEmail)
 
         if user is None:
             return jsonify({"success": False, "message": "User not found"})
@@ -195,10 +203,12 @@ def getTrainingHistory(id):
         
         historyObj = []
         for record in history:
+            question = Question.get_question_by_id(record.question_id)
             historyObj.append({
                 "User_id": record.user_id,
-                "Question_id": record.question_id,
-                "Answer" : record.answer
+                "Question": question.question,
+                "User Answer" : record.answer,
+                "Correct Answer": question.answer_one
             })
 
         return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})

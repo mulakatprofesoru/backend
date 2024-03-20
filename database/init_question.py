@@ -20,6 +20,7 @@ def fill_question_database(db):
                 question = row[0]
                 answer1 = row[1]
                 answer2 = row[2]
-                new_question = Question(question=question, answer_one=answer1, answer_two=answer2)
+                question_type = row[3]
+                new_question = Question(question=question, answer_one=answer1, answer_two=answer2, question_type=question_type)
                 db.session.add(new_question)
         db.session.commit()

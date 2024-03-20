@@ -1,4 +1,4 @@
-import csv
+import secrets
 from flask import Flask, jsonify
 from api.user_connector import apiUsers
 from api.question_connector import apiQuestion
@@ -12,9 +12,12 @@ from database.initialize_db import createDB
 from database import db
 
 app = createApp()  
-app.secret_key = "1234"
 createDB()
 CORS(app)
+
+
+secret_key = secrets.token_hex(16)
+app.secret_key = secret_key
 
 with app.app_context():
     fill_question_database(db)
