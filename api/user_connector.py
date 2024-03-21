@@ -205,10 +205,10 @@ def getTrainingHistory():
         for record in history:
             question = Question.get_question_by_id(record.question_id)
             historyObj.append({
-                "User_id": record.user_id,
-                "Question": question.question,
-                "User Answer" : record.answer,
-                "Correct Answer": question.answer_one
+                "user_id": record.user_id,
+                "question": question.question,
+                "user_answer" : record.answer,
+                "correct_answer": question.answer_one
             })
 
         return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})
