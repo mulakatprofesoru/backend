@@ -176,7 +176,7 @@ def addTrainingHistory():
         if question_id == None or answer == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
-        User.add_history_by_id(user.user_id, question_id, answer)
+        User.add_training_history_by_id(user.user_id, question_id, answer)
 
         return jsonify({"success": True, "message": "History added successfully.."})
         
@@ -196,7 +196,7 @@ def getTrainingHistory():
         if user is None:
             return jsonify({"success": False, "message": "User not found"})
               
-        history = user.training_history
+        history = User.get_training_history_by_id(user.user_id)
         
         if history is None:
             return jsonify({"success": False, "message": "Training history not found"})
@@ -215,4 +215,78 @@ def getTrainingHistory():
         
     except Exception as e:
         print("ERROR in getTrainingHistory: ", e)
+        return jsonify({"success": False, "message": "There is an error"})
+    
+@apiUsers.route("/addTestHistory", methods=["POST"])
+def addTestHistory():
+    try:
+        global __globalEmail
+        if __globalEmail == None:
+            return jsonify({"success": False, "message": "Not logged in"})
+        
+        user = User.get_user_by_email(__globalEmail)
+
+        if user is None:
+            return jsonify({"success": False, "message": "User not found"})
+
+        test_id = request.form.get("test_id")
+        
+        if test_id == None:
+            return jsonify({"success": False, "message": "Missing fields"})
+
+        test_history_id = User.add_test_history_by_id(user.user_id, test_id)
+
+        answers = []
+        for i in range (1,10):
+            answers.append({"question_id": i, "answer": "selam"})
+
+        for answer in answers:
+            User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = answer["question_id"], answer=answer["answer"])
+
+        return jsonify({"success": True, "message": "History added successfully.."})
+        
+    except Exception as e:
+        print("ERROR in addTestHistory: ", e)
+        return jsonify({"success": False, "message": "There is an error"})
+    
+@apiUsers.route("/getTestHistory", methods=["GET"])
+def getTestHistory():
+    try:
+        global __globalEmail
+        if __globalEmail == None:
+            return jsonify({"success": False, "message": "Not logged in"})
+        
+        user = User.get_user_by_email(__globalEmail)
+
+        if user is None:
+            return jsonify({"success": False, "message": "User not found"})
+              
+        history = User.get_test_history_by_id(user.user_id)
+        
+        if history is None:
+            return jsonify({"success": False, "message": "Test history not found"})
+        
+        
+        
+        historyObj = []
+        for record in history:
+            testQuestionHistory = record.test_question_history
+            questions = []
+            for testQuestionRecord in testQuestionHistory:
+                question = Question.get_question_by_id(testQuestionRecord.question_id)
+                questions.append({
+                    "Question": question.question,
+                    "User Answer" : testQuestionRecord.answer,
+                    "Correct Answer": question.answer_one
+                })
+            historyObj.append({
+                    "User_id": record.user_id,
+                    "Test_id": record.test_id,
+                    "Questions": questions
+            })
+
+        return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})
+        
+    except Exception as e:
+        print("ERROR in getTestHistory: ", e)
         return jsonify({"success": False, "message": "There is an error"})

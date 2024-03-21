@@ -11,7 +11,10 @@ class User(db.Model):
     email = db.Column(db.String(120), unique = True, nullable = False)
     password = db.Column(db.String(200), nullable = False)
     general_score = db.Column(db.Double)
+    
     training_history = db.relationship("TrainingHistory", back_populates="user", cascade="all, delete-orphan")
+    test_history = db.relationship("TestHistory", back_populates="user", cascade="all, delete-orphan")
+    
     
     def __init__(self, user_id, username, email, password, general_score):
         self.user_id = user_id
@@ -58,12 +61,12 @@ class User(db.Model):
         db.session.commit()
         
     @classmethod
-    def get_history_by_id(cls, user_id):  
+    def get_training_history_by_id(cls, user_id):  
         user = cls.query.filter_by(user_id=user_id).first()
         return user.training_history
 
     @classmethod
-    def add_history_by_id(cls, user_id, question_id, answer):
+    def add_training_history_by_id(cls, user_id, question_id, answer):
         user = cls.query.filter_by(user_id=user_id).first()
         
         if len(user.training_history) >= 100:
@@ -74,20 +77,31 @@ class User(db.Model):
         new_history = TrainingHistory(user_id=user_id, question_id=question_id, answer=answer)
         user.training_history.append(new_history)
         db.session.commit()
-
-""" @dataclass
-class Test(db.Model):
-    __tablename__ = "test"
+        
+    @classmethod
+    def get_test_history_by_id(cls, user_id):  
+        user = cls.query.filter_by(user_id=user_id).first()
+        return user.test_history
     
-    test_id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.user_id"), nullable = False)
-    score = db.Column(db.Double)
-
-    def __init__(self, test_id, user_id, score):
-        self.test_id = test_id
-        self.user_id = user_id
-        self.score = score """
-
+    @classmethod
+    def add_test_history_by_id(cls, user_id, test_id):
+        user = cls.query.filter_by(user_id=user_id).first()
+        
+        if len(user.test_history) >= 10:
+            oldest_record = min(user.test_history, key=lambda x: x.timestamp)
+            user.test_history.remove(oldest_record)
+            
+        new_history = TestHistory(user_id=user_id, test_id=test_id)
+        user.test_history.append(new_history)
+        db.session.commit()
+        return new_history.test_history_id
+        
+    @classmethod
+    def add_test_question_history_by_id(cls, user_id, test_history_id, question_id, answer):
+        test_history = TestHistory.get_test_history_by_id(test_history_id)
+        new_test_question_history = TestQuestionHistory(user_id=user_id, test_history_id=test_history.test_history_id, question_id=question_id, answer=answer)
+        test_history.test_question_history.append(new_test_question_history)
+        db.session.commit()
 
 
 @dataclass
@@ -101,6 +115,7 @@ class Question(db.Model):
     question_type = db.Column(db.String(200), nullable = False)
     
     training_history = db.relationship("TrainingHistory", back_populates="question", cascade="all, delete-orphan")
+    test_question_history = db.relationship("TestQuestionHistory", back_populates="question", cascade="all, delete-orphan")
     
     def __init__(self, question, answer_one, answer_two, question_type):
         self.question = question
@@ -163,7 +178,8 @@ class Test(db.Model):
     
     test_id = db.Column(db.Integer, primary_key=True)
     questions = db.relationship("Question", secondary=test_question_association, backref="tests")
-
+    test_history = db.relationship("TestHistory", back_populates="test", cascade="all, delete-orphan")
+    
     def __init__(self, questions):
         self.questions = questions
         
@@ -176,3 +192,44 @@ class Test(db.Model):
         new_test = Test(questions)
         db.session.add(new_test)
         db.session.commit()
+        
+@dataclass
+class TestHistory(db.Model):
+    __tablename__ = "test_history"
+    
+    test_history_id = db.Column(db.Integer, primary_key=True)
+    test_id = db.Column(db.Integer, db.ForeignKey('tests.test_id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
+    timestamp = db.Column(db.DateTime, default= datetime.now(timezone.utc))
+    
+    user = db.relationship("User", back_populates="test_history")
+    test = db.relationship("Test", back_populates="test_history")
+    test_question_history = db.relationship("TestQuestionHistory", back_populates="test_history", cascade="all, delete-orphan")
+
+    
+    def __init__(self, user_id, test_id):
+        self.user_id = user_id
+        self.test_id = test_id
+        
+    @classmethod
+    def get_test_history_by_id(cls, test_history_id):
+        return cls.query.filter_by(test_history_id=test_history_id).first()
+
+@dataclass
+class TestQuestionHistory(db.Model):
+    __tablename__ = "test_question_history"
+    
+    test_question_history_id = db.Column(db.Integer, primary_key=True)
+    answer = db.Column(db.String(2000), nullable=False)
+    test_history_id = db.Column(db.Integer, db.ForeignKey('test_history.test_history_id'))
+    question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'))
+    timestamp = db.Column(db.DateTime, default= datetime.now(timezone.utc))
+    
+    question = db.relationship("Question", back_populates="test_question_history")
+    test_history = db.relationship("TestHistory", back_populates="test_question_history")
+    
+    def __init__(self, user_id, test_history_id, question_id, answer):
+        self.user_id = user_id
+        self.test_history_id = test_history_id
+        self.question_id = question_id
+        self.answer = answer
