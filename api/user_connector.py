@@ -275,14 +275,14 @@ def getTestHistory():
             for testQuestionRecord in testQuestionHistory:
                 question = Question.get_question_by_id(testQuestionRecord.question_id)
                 questions.append({
-                    "Question": question.question,
-                    "User Answer" : testQuestionRecord.answer,
-                    "Correct Answer": question.answer_one
+                    "question": question.question,
+                    "user_answer" : testQuestionRecord.answer,
+                    "correct_answer": question.answer_one
                 })
             historyObj.append({
-                    "User_id": record.user_id,
-                    "Test_id": record.test_id,
-                    "Questions": questions
+                    "user_id": record.user_id,
+                    "test_id": record.test_id,
+                    "questions": questions
             })
 
         return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})
