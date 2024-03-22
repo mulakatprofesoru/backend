@@ -1,3 +1,6 @@
+import sys
+sys.path.append("..")
+
 import requests
 import json
 import os
@@ -11,6 +14,9 @@ class ChatGPTHelper:
         "Authorization": f"Bearer {__openai_api_key}"
     }
 
+    def __init__(self) -> None:
+        pass
+
 
     def check_api_key(self):
         if self.__openai_api_key is None:
@@ -18,6 +24,8 @@ class ChatGPTHelper:
 
     
     def get_hint_from_chatgpt(self, question : str):
+        self.check_api_key()
+
         data = {
             "model": "gpt-3.5-turbo",
             "messages": [
@@ -36,14 +44,12 @@ class ChatGPTHelper:
 
         # Check if the request was successful
         if response.status_code == 200:
-            print("Response from OpenAI:", response.json())
-            print('\n')
-            print(response.json()['choices'][0]['message']['content'])
-        else:
-            print("Error:", response.status_code, response.text)
+            return response.json()['choices'][0]['message']['content']
 
 
     def get_feedback_from_chatgpt(self, question : str, answer : str):
+        self.check_api_key()
+
         data = {
             "model": "gpt-3.5-turbo",
             "messages": [
@@ -62,8 +68,4 @@ class ChatGPTHelper:
 
         # Check if the request was successful
         if response.status_code == 200:
-            print("Response from OpenAI:", response.json())
-            print('\n')
-            print(response.json()['choices'][0]['message']['content'])
-        else:
-            print("Error:", response.status_code, response.text)
+            return response.json()['choices'][0]['message']['content']
