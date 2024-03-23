@@ -15,8 +15,8 @@ def getTest(id):
         
         for question in test.questions:
             questions.append({
-                "Question Id": question.question_id,
-                "Question": question.question
+                "questionId": question.question_id,
+                "question": question.question
             })
 
         return jsonify({"succes": True, "data": questions})

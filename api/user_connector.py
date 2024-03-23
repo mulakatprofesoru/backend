@@ -239,7 +239,6 @@ def addTestHistory():
             return jsonify({"success": False, "message": "User not found"})
 
         test_id = request.form.get("test_id")
-        
         if test_id == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
@@ -251,9 +250,9 @@ def addTestHistory():
         for answer in questionAnswer:
             User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = answer["question_id"], answer=answer["answer"])
 
-        score = ""
+        score = 5
 
-        return jsonify({"success": True, "message": "History added successfully..", "data": score})
+        return jsonify({"success": True, "message": "History added successfully..", "score": score})
         
     except Exception as e:
         print("ERROR in addTestHistory: ", e)
