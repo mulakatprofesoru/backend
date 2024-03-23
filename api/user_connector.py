@@ -179,7 +179,15 @@ def addTrainingHistory():
 
         User.add_training_history_by_id(user.user_id, question_id, answer)
 
-        return jsonify({"success": True, "message": "History added successfully.."})
+
+        result = {
+                "question": Question.get_question_by_id(question_id).question,
+                "answer": answer,
+                "score": "",
+                "feedback": ""
+        }
+        
+        return jsonify({"success": True, "message": "History added successfully..", "data": result})
         
     except Exception as e:
         print("ERROR in addTrainingHistory: ", e)
