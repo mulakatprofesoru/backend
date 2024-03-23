@@ -251,7 +251,9 @@ def addTestHistory():
         for answer in questionAnswer:
             User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = answer["question_id"], answer=answer["answer"])
 
-        return jsonify({"success": True, "message": "History added successfully.."})
+        score = ""
+
+        return jsonify({"success": True, "message": "History added successfully..", "data": score})
         
     except Exception as e:
         print("ERROR in addTestHistory: ", e)
