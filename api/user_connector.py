@@ -1,6 +1,7 @@
 from flask import jsonify, Blueprint, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.models import Question, User
+import json
 
 apiUsers = Blueprint("apiUser", __name__, url_prefix="/api/users")
 __globalEmail = None
@@ -236,11 +237,10 @@ def addTestHistory():
 
         test_history_id = User.add_test_history_by_id(user.user_id, test_id)
 
-        answers = []
-        for i in range (1,10):
-            answers.append({"question_id": i, "answer": "selam"})
+        questionAnswer = request.form.get("question_answer")
+        questionAnswer = json.loads(questionAnswer)
 
-        for answer in answers:
+        for answer in questionAnswer:
             User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = answer["question_id"], answer=answer["answer"])
 
         return jsonify({"success": True, "message": "History added successfully.."})
@@ -265,8 +265,6 @@ def getTestHistory():
         
         if history is None:
             return jsonify({"success": False, "message": "Test history not found"})
-        
-        
         
         historyObj = []
         for record in history:
