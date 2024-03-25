@@ -9,6 +9,7 @@ from flask import request
 
 from database import createApp
 from database.init_question import fill_question_database
+from database.init_test import fill_tests_database
 from database.initialize_db import createDB
 from database import db
 
@@ -22,6 +23,7 @@ app.secret_key = secret_key
 
 with app.app_context():
     fill_question_database(db)
+    fill_tests_database(db)
 
 app.register_blueprint(apiUsers)
 app.register_blueprint(apiQuestion)
