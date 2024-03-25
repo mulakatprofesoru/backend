@@ -35,7 +35,7 @@ class ChatGPTHelper:
                 },
                 {
                     "role": "user",
-                    "content": "Give a short hint that will help to the user who answers this question without giving the answer itself: " + question
+                    "content": "Give a short hint that will help to the user who answers this question without giving the answer itself.\nExample: Question: Explain the concept of the Bellman-Ford algorithm and when it is used.\tAnswer: Think about how the Bellman-Ford algorithm iteratively relaxes edges in a graph and maintains distance estimates to find the shortest path from a source vertex to all other vertices, considering negative edge weights and detecting negative cycles.\nQuestion:" + question
                 }
             ]
         }
@@ -69,3 +69,11 @@ class ChatGPTHelper:
         # Check if the request was successful
         if response.status_code == 200:
             return response.json()['choices'][0]['message']['content']
+
+'''
+helper = ChatGPTHelper()
+answer = helper.get_hint_from_chatgpt("Explain the collision resolution techniques used in hash tables.")
+print(answer)
+
+answer = helper.get_hint_from_chatgpt("Can you describe a time when you had to lead a team through a period of change?")
+print(answer)'''
