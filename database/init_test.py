@@ -5,7 +5,6 @@ from flask import current_app
 def fill_tests_database(db):
     existing_questions = Test.query.all()
     if existing_questions:
-        print("Testler zaten dolu, ekleme işlemi yapılmayacak.")
         return
     
     first = True

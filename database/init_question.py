@@ -5,7 +5,6 @@ from flask import current_app
 def fill_question_database(db):
     existing_questions = Question.query.all()
     if existing_questions:
-        print("Veritabanı zaten dolu, ekleme işlemi yapılmayacak.")
         return
     
     first = True
