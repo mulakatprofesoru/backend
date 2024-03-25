@@ -1,6 +1,7 @@
 from flask import jsonify, Blueprint, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.models import Question, User
+from helper.chatgpt_connection_helper import ChatGPTHelper
 import json
 
 apiUsers = Blueprint("apiUser", __name__, url_prefix="/api/users")
@@ -178,13 +179,16 @@ def addTrainingHistory():
             return jsonify({"success": False, "message": "Missing fields"})
 
         User.add_training_history_by_id(user.user_id, question_id, answer)
+        question = Question.get_question_by_id(question_id).question
 
+        chatgpt_helper = ChatGPTHelper()
+        feedback = chatgpt_helper.get_feedback_from_chatgpt(question=question, answer=answer)
 
         result = {
-                "question": Question.get_question_by_id(question_id).question,
+                "question": question,
                 "answer": answer,
                 "score": "",
-                "feedback": ""
+                "feedback": feedback
         }
         
         return jsonify({"success": True, "message": "History added successfully..", "data": result})
