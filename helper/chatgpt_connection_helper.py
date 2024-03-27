@@ -69,11 +69,3 @@ class ChatGPTHelper:
         # Check if the request was successful
         if response.status_code == 200:
             return response.json()['choices'][0]['message']['content']
-
-'''
-helper = ChatGPTHelper()
-answer = helper.get_hint_from_chatgpt("Explain the collision resolution techniques used in hash tables.")
-print(answer)
-
-answer = helper.get_hint_from_chatgpt("Can you describe a time when you had to lead a team through a period of change?")
-print(answer)'''
