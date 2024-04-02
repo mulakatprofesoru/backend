@@ -165,13 +165,12 @@ def logout():
 def addTrainingHistory():
     try:
         global __globalEmail
-        if __globalEmail == None:
-            return jsonify({"success": False, "message": "Not logged in"})
-        
-        user = User.get_user_by_email(__globalEmail)
+        if __globalEmail != None:
+            user = User.get_user_by_email(__globalEmail)
 
-        if user is None:
-            return jsonify({"success": False, "message": "User not found"})
+            if user is None:
+                return jsonify({"success": False, "message": "User not found"})
+
 
         question_id = request.form.get("question_id")
         answer = request.form.get("answer")
@@ -179,9 +178,10 @@ def addTrainingHistory():
         if question_id == None or answer == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
-        User.add_training_history_by_id(user.user_id, question_id, answer)
+        if __globalEmail != None:
+            User.add_training_history_by_id(user.user_id, question_id, answer)
+        
         question = Question.get_question_by_id(question_id)
-
         chatgpt_helper = ChatGPTHelper()
         feedback = chatgpt_helper.get_feedback_from_chatgpt(question=question.question, answer=answer)
 
@@ -195,7 +195,7 @@ def addTrainingHistory():
                 "feedback": feedback
         }
         
-        return jsonify({"success": True, "message": "History added successfully..", "data": result})
+        return jsonify({"success": True, "message": "Training question solved..", "data": result})
         
     except Exception as e:
         print("ERROR in addTrainingHistory: ", e)
@@ -238,19 +238,18 @@ def getTrainingHistory():
 def addTestHistory():
     try:
         global __globalEmail
-        if __globalEmail == None:
-            return jsonify({"success": False, "message": "Not logged in"})
-        
-        user = User.get_user_by_email(__globalEmail)
+        if __globalEmail != None:
+            user = User.get_user_by_email(__globalEmail)
 
-        if user is None:
-            return jsonify({"success": False, "message": "User not found"})
+            if user is None:
+                return jsonify({"success": False, "message": "User not found"})
 
         test_id = request.form.get("test_id")
         if test_id == None:
             return jsonify({"success": False, "message": "Missing fields"})
 
-        test_history_id = User.add_test_history_by_id(user.user_id, test_id)
+        if __globalEmail != None:
+            test_history_id = User.add_test_history_by_id(user.user_id, test_id)
 
         questionAnswer = request.form.get("question_answer")
         questionAnswer = json.loads(questionAnswer)
@@ -265,7 +264,9 @@ def addTestHistory():
             correct_answer = Question.get_question_by_id(question_id=question_id).answer_one
             question_score = model_helper.get_score(user_answer, correct_answer)
 
-            User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = question_id, answer=user_answer)
+            if __globalEmail != None:
+                User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = question_id, answer=user_answer)
+            
             total_score = total_score + question_score
 
         general_score = total_score / 10
