@@ -1,6 +1,6 @@
 from flask import jsonify, Blueprint, request
 from werkzeug.security import generate_password_hash, check_password_hash
-from database.models import Question, User
+from database.models import Question, TestHistory, User
 from helper.chatgpt_connection_helper import ChatGPTHelper
 from helper.model_connection_helper import ModelConnectionHelper
 import json
@@ -250,7 +250,7 @@ def addTestHistory():
             return jsonify({"success": False, "message": "Missing fields"})
 
         if __globalEmail != None:
-            test_history_id = User.add_test_history_by_id(user.user_id, test_id)
+            test_history_id = User.add_test_history_by_id(user.user_id, test_id, 0)
 
         questionAnswer = request.form.get("question_answer")
         questionAnswer = json.loads(questionAnswer)
@@ -266,11 +266,12 @@ def addTestHistory():
             question_score = model_helper.get_score(user_answer, correct_answer)
 
             if __globalEmail != None:
-                User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = question_id, answer=user_answer)
+                User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = question_id, answer=user_answer, score=question_score)
             
             total_score = total_score + question_score
 
         general_score = total_score / 10
+        TestHistory.update_test_history(test_history_id=test_history_id, score=general_score)
         return jsonify({"success": True, "message": "History added successfully..", "score": general_score})
         
     except Exception as e:
@@ -303,12 +304,14 @@ def getTestHistory():
                 questions.append({
                     "question": question.question,
                     "user_answer" : testQuestionRecord.answer,
-                    "correct_answer": question.answer_one
+                    "correct_answer": question.answer_one,
+                    "question_score": testQuestionRecord.score
                 })
             historyObj.append({
                     "user_id": record.user_id,
                     "test_id": record.test_id,
-                    "questions": questions
+                    "questions": questions,
+                    "test_score": record.score
             })
 
         return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})
