@@ -66,7 +66,7 @@ class User(db.Model):
         return user.training_history
 
     @classmethod
-    def add_training_history_by_id(cls, user_id, question_id, answer):
+    def add_training_history_by_id(cls, user_id, question_id, answer, score):
         user = cls.query.filter_by(user_id=user_id).first()
         
         if len(user.training_history) >= 100:
@@ -74,7 +74,7 @@ class User(db.Model):
             user.training_history.remove(oldest_record)
             db.session.delete(oldest_record)
             
-        new_history = TrainingHistory(user_id=user_id, question_id=question_id, answer=answer)
+        new_history = TrainingHistory(user_id=user_id, question_id=question_id, answer=answer, score=score)
         user.training_history.append(new_history)
         db.session.commit()
         
@@ -154,16 +154,17 @@ class TrainingHistory(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.user_id'))
     question_id = db.Column(db.Integer, db.ForeignKey('questions.question_id'))
     answer = db.Column(db.String(2000), nullable=False)
-    #score = db.Column(db.Float, nullable = False) SONRADAN EKLENECEK
+    score = db.Column(db.Float, nullable = False) 
     timestamp = db.Column(db.DateTime, default= datetime.now(timezone.utc))
     
     user = db.relationship("User", back_populates="training_history")
     question = db.relationship("Question", back_populates="training_history")
     
-    def __init__(self, user_id, question_id, answer):
+    def __init__(self, user_id, question_id, answer, score):
         self.user_id = user_id
         self.question_id = question_id
         self.answer = answer
+        self.score = score
         
         
 test_question_association = db.Table(

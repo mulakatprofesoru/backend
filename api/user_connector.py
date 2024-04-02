@@ -177,9 +177,6 @@ def addTrainingHistory():
         
         if question_id == None or answer == None:
             return jsonify({"success": False, "message": "Missing fields"})
-
-        if __globalEmail != None:
-            User.add_training_history_by_id(user.user_id, question_id, answer)
         
         question = Question.get_question_by_id(question_id)
         chatgpt_helper = ChatGPTHelper()
@@ -187,6 +184,9 @@ def addTrainingHistory():
 
         model_helper = ModelConnectionHelper()
         score = model_helper.get_score(answer, question.answer_one)
+
+        if __globalEmail != None:
+            User.add_training_history_by_id(user.user_id, question_id, answer, score)
 
         result = {
                 "question": question.question,
@@ -225,7 +225,8 @@ def getTrainingHistory():
                 "user_id": record.user_id,
                 "question": question.question,
                 "user_answer" : record.answer,
-                "correct_answer": question.answer_one
+                "correct_answer": question.answer_one,
+                "score": record.score
             })
 
         return jsonify({"success": True, "data": historyObj, "count": len(historyObj)})
