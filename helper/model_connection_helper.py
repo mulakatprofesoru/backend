@@ -18,5 +18,6 @@ class ModelConnectionHelper:
 
         cosine_scores = util.cos_sim(embeddings1, embeddings2)
         score_tensor = cosine_scores[0].item()
-        score_float = float("{:.4f}".format(score_tensor))
-        return score_float
+        score_float = float("{:.2f}".format(score_tensor))
+        score_out_of_ten = score_float * 10
+        return score_out_of_ten

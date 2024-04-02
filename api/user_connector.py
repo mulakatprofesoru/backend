@@ -2,6 +2,7 @@ from flask import jsonify, Blueprint, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from database.models import Question, User
 from helper.chatgpt_connection_helper import ChatGPTHelper
+from helper.model_connection_helper import ModelConnectionHelper
 import json
 
 apiUsers = Blueprint("apiUser", __name__, url_prefix="/api/users")
@@ -179,15 +180,18 @@ def addTrainingHistory():
             return jsonify({"success": False, "message": "Missing fields"})
 
         User.add_training_history_by_id(user.user_id, question_id, answer)
-        question = Question.get_question_by_id(question_id).question
+        question = Question.get_question_by_id(question_id)
 
         chatgpt_helper = ChatGPTHelper()
-        feedback = chatgpt_helper.get_feedback_from_chatgpt(question=question, answer=answer)
+        feedback = chatgpt_helper.get_feedback_from_chatgpt(question=question.question, answer=answer)
+
+        model_helper = ModelConnectionHelper()
+        score = model_helper.get_score(answer, question.answer_one)
 
         result = {
-                "question": question,
+                "question": question.question,
                 "answer": answer,
-                "score": "",
+                "score": score,
                 "feedback": feedback
         }
         
@@ -251,12 +255,21 @@ def addTestHistory():
         questionAnswer = request.form.get("question_answer")
         questionAnswer = json.loads(questionAnswer)
 
+        model_helper = ModelConnectionHelper()
+
+        total_score = 0.0
         for answer in questionAnswer:
-            User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = answer["question_id"], answer=answer["answer"])
+            question_id = answer["question_id"]
+            user_answer = answer["answer"]
 
-        score = 5
+            correct_answer = Question.get_question_by_id(question_id=question_id).answer_one
+            question_score = model_helper.get_score(user_answer, correct_answer)
 
-        return jsonify({"success": True, "message": "History added successfully..", "score": score})
+            User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = question_id, answer=user_answer)
+            total_score = total_score + question_score
+
+        general_score = total_score / 10
+        return jsonify({"success": True, "message": "History added successfully..", "score": general_score})
         
     except Exception as e:
         print("ERROR in addTestHistory: ", e)
