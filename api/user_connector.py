@@ -184,6 +184,7 @@ def addTrainingHistory():
 
         model_helper = ModelConnectionHelper()
         score = model_helper.get_score(answer, question.answer_one)
+        score = float("{:.1f}".format(score))
 
         if __globalEmail != None:
             User.add_training_history_by_id(user.user_id, question_id, answer, score)
