@@ -271,7 +271,9 @@ def addTestHistory():
             total_score = total_score + question_score
 
         general_score = total_score / 10
-        TestHistory.update_test_history(test_history_id=test_history_id, score=general_score)
+        general_score = float("{:.1f}".format(general_score))
+        if __globalEmail != None:
+            TestHistory.update_test_history(test_history_id=test_history_id, score=general_score)
         return jsonify({"success": True, "message": "History added successfully..", "score": general_score})
         
     except Exception as e:
