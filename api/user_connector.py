@@ -21,8 +21,7 @@ def users():
                     "user_id": user.user_id,
                     "username": user.username,
                     "email": user.email,
-                    "password": user.password,
-                    "general_score": user.general_score
+                    "password": user.password
                 }
             )
 
@@ -46,8 +45,7 @@ def user(id):
                 "user id": user.user_id,
                 "username": user.username,
                 "email": user.email,
-                "password": user.password,
-                "user general score": user.general_score
+                "password": user.password
             }
             return jsonify({"success": True, "data": userObj})
         # ----------------------------------------------------------------------
@@ -59,7 +57,6 @@ def user(id):
             username = request.form.get("username")
             email = request.form.get("email")
             password = request.form.get("password")
-            general_score = request.form.get("general_score")
 
             if username == None:
                 username = user.username
@@ -69,13 +66,10 @@ def user(id):
 
             if password == None:
                     password = user.password
-                    
-            if general_score == None:
-                    general_score = user.general_score
 
             hashed_password = generate_password_hash(password)
 
-            User.update_user(id, username, email, hashed_password, general_score)
+            User.update_user(id, username, email, hashed_password)
 
             return jsonify({"success": True, "message": "User updated"})
         # ----------------------------------------------------------------------

@@ -10,18 +10,16 @@ class User(db.Model):
     username = db.Column(db.String(120), nullable = False)
     email = db.Column(db.String(120), unique = True, nullable = False)
     password = db.Column(db.String(200), nullable = False)
-    general_score = db.Column(db.Double)
     
     training_history = db.relationship("TrainingHistory", back_populates="user", cascade="all, delete-orphan")
     test_history = db.relationship("TestHistory", back_populates="user", cascade="all, delete-orphan")
     
     
-    def __init__(self, user_id, username, email, password, general_score):
+    def __init__(self, user_id, username, email, password):
         self.user_id = user_id
         self.username = username
         self.email = email
         self.password = password
-        self.general_score = general_score
     
     @classmethod
     def get_all_users(cls):  
@@ -41,17 +39,16 @@ class User(db.Model):
     
     @classmethod
     def add_user(cls, username, email, password):  # Id'yi unique biz vericez.
-        user = User(None, username, email, password, 0)
+        user = User(None, username, email, password)
         db.session.add(user)
         db.session.commit()
         
     @classmethod
-    def update_user(cls, user_id, username, email, password, general_score):
+    def update_user(cls, user_id, username, email, password):
         user = cls.query.filter_by(user_id=user_id).first()
         user.username = username
         user.email = email
         user.password = password
-        user.general_score = general_score
         db.session.commit()
         
     @classmethod
