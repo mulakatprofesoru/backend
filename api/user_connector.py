@@ -265,6 +265,7 @@ def addTestHistory():
 
             correct_answer = Question.get_question_by_id(question_id=question_id).answer_one
             question_score = model_helper.get_score(user_answer, correct_answer)
+            question_score = float("{:.1f}".format(question_score))
 
             if __globalEmail != None:
                 User.add_test_question_history_by_id(user_id = user.user_id, test_history_id = test_history_id, question_id = question_id, answer=user_answer, score=question_score)
